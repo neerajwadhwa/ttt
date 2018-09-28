@@ -25,7 +25,7 @@ const playerSign = 'X';
 const computerSign  = 'O';
 
 
-const winningPattern_2 = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
+const winningPatternX3 = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
 
 function initializeGrid() {
     for (let colIdx = 0;colIdx < GRID_LENGTH; colIdx++) {
@@ -101,9 +101,21 @@ function onBoxClick() {
 
     renderMainGrid();
     //	call checkForWin() here;
-    checkForWin();
-    addClickHandlers();
-    
+    if (checkForWin(winningPatternX3)) {
+
+			// If the match has ended then reset the grid;
+    	grid.splice(0, grid.length)
+	    initializeGrid();
+	    //	console.log(grid);
+    	renderMainGrid();
+    	addClickHandlers();
+
+    } else {
+
+    	addClickHandlers();
+
+    }
+
 }
 
 function addClickHandlers() {
@@ -118,37 +130,56 @@ function addClickHandlers() {
 }
 
 
-const checkForWin = () => {
+const checkForWin = (winningPatternInput) => {
 	let boxes = document.getElementsByClassName("box");
-	let alertSent = false;
-	for (let index = 0; index < winningPattern_2.length; index += 1) {
-		const [first, second, third] = winningPattern_2[index];
+	for (let index = 0; index < winningPatternInput.length; index += 1) {
 		
-		if (boxes[first].innerText == playerSign && boxes[second].innerText == playerSign && boxes[third].innerText == playerSign) {
-
+		let boxesToCheck = getBoxesToCheckForWin(boxes, winningPatternInput[index]);
+	
+		if(doAllInTheListHaveSign(boxesToCheck, playerSign)) {
+			
 			alert(`Player (${playerSign}) won`);
-			alertSent = true;
-			break;
-		} else if (boxes[first].innerText == computerSign && boxes[second].innerText == computerSign && boxes[third].innerText == computerSign) {
+			return true
+			
+		} else if (doAllInTheListHaveSign(boxesToCheck, computerSign)) {
+		
 			alert(`Computer (${computerSign}) won`);
-			alertSent = true;
-			break;
+			return true
+			
 		}
 	}
 	
-	if (!alertSent) {
-		let usedBoxes = 0;
+	let usedBoxes = 0;
 		
-		for (let index = 0; index < boxes.length; index += 1) {
-			if (boxes[index].innerText !== '') {
-				usedBoxes += 1;
-			}
+	for (let index = 0; index < boxes.length; index += 1) {
+		if (boxes[index].innerText !== '') {
+			usedBoxes += 1;
 		}
+	}
 		
-		if (usedBoxes === 9) {
-			alert('Match draw');
-		}
-	}	
+	if (usedBoxes === GRID_LENGTH * GRID_LENGTH) {
+		alert('Match draw');
+		return true;
+	}
+	return false;	
+}
+
+
+const getBoxesToCheckForWin = (boxes, winningPattern) => {
+	return winningPattern.map((digit) => {
+		
+		return boxes[digit];
+	});
+}
+
+const doAllInTheListHaveSign = (list, sign) => {
+
+	for (let index = 0; index < list.length; index += 1) {
+		if (!(list[index].innerText == sign)) {
+			return false;
+		} 
+	}
+	return true;
 }
 
 
